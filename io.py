@@ -29,6 +29,7 @@ def read_data(filename, skip_first_line = False, ignore_first_column = False):
     # check if the file exists 
     if not os.path.isfile(filename):
     	print "Error! No such file!\n"
+    	exit()
     else:
 		with open(filename,'r') as f:
 			if skip_first_line:

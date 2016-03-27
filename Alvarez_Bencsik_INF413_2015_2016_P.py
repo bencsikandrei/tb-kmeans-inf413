@@ -12,16 +12,16 @@ import random
 import sys
 import os
 import io
-###############################################################################
-##################### Define the constants ####################################
+#################################################
+##################### Define the constants ######
 MaxK = 10
 MAX_ITERS = 3000
 MaxN = 1000
 flag = False
 flag_count = 0
-###############################################################################
-####################### Classes ###############################################
-###############################################################################
+#################################################
+####################### Classes #################
+#################################################
 class Cluster:
 	"""
 		A cluster is a group of points 
@@ -129,7 +129,7 @@ class Cluster:
 	
 	
 	
-
+#################################################
 class Point:
 	"""
 		Class Point: V 1.0
@@ -166,9 +166,9 @@ class Point:
 			print "The points don't have the same number of attributes"
 			return None
 	
-###############################################################################
-# FUNCTION
-###############################################################################
+#################################################
+# FUNCTIONS
+#################################################
 def choose_cluster(point, clusters):
 	"""
 		Update the cluster for the given point
@@ -246,20 +246,97 @@ def list2set(aList):
 		for el in ll:
 			_set.add( el )
 	return _set
-###############################################################################
-########################## TESTS ##############################################
-###############################################################################
-def kmeans():
-    pass    
 
-###############################################################################
-######################## TESTS END ############################################
-###############################################################################
+def pretty_print(clusters):
+    for ctrd in clusters:
+        print "Cluster # " + str( ctrd.get_id() )
+        print "Center " + str (ctrd.center.coords)
+        #for pt in ctrd.points:
+        	#print pt.coords,
+        	#print " dist  " + str (pt.distance( centroids[0].center ) )+  " " +  str (pt.distance( centroids[1].center ) ) + " " + str (pt.distance( centroids[2].center ) )
+        print "Points within the cluster : " + str ( len(  ctrd.points  ) )
+        
+def write_output(argv, points):
+    if len(argv) < 4:
+        f = open("output.csv", "w")
+    else:
+        f = open(argv[3], "w")
+    f.write("# The coordinates of the points and the cluster they are in\n")
+    for pt in points:
+        f.write( str( pt.coords ) + " | Cluster id: " + str( pt.cluster ) + "|\n") 
+    f.close()
+    
+def write_centers(argv, clusters):
+    f = open("centers.csv", "w")
+    f.write("# The coordinates of the centers\n")
+    for ct in clusters:
+	    f.write( str( ct.center.coords ) + " | Cluster id: " + str( ct.get_id() ) + "|\n") 
+    f.close()
+##################################################
+########################## K-means algorithm #####
+##################################################
 
-###############################################################################
-######################### Main ################################################
-###############################################################################
+def kmeans( k, points ):
+    """
+    Perform the K-means algorithm
+    
+    """
+    global flag_count
+    
+    # centers set so we do not have a duplicate point as a center
+    centers = set()
+    while len( centers ) < k:
+        centers.add( random.choice( points ) )
+    
+    # list of clusters where we keep the K clusters
+    # also give them an ID
+    clusters = []
+    counter = 0
+    for cent in centers:
+        clusters.append( Cluster( cent ) )
+        clusters[-1].set_id( counter ) 
+        counter += 1
+    
+    for i in xrange( MAX_ITERS ):
+        flag = False
+    
+        for ctrd in clusters:
+    	    # print the centroid and its intradistance
+    	    # print "Cluster no. " + str(ctrd.get_id())
+    	    # print ctrd.intra_distance()
+    	    """
+    	        for each cluster, update the centroid
+    	        i.e.recompute the mean of all points
+    	    """
+            ctrd.update_centroid()
+        # for each point , update the centroid
+        for pt in points:
+            """
+                for all points, chose a cluster
+                i.e. compute the distance to all cluster
+                centroids and choose the cluster 
+                that is closest
+            """
+            choose_cluster( pt, clusters )
+        # id no points change centroid, stop
+        if not flag:
+    	    flag_count += 1
+    	    # print "Iterations: " + str(i)
+    	    if flag_count >= 5:
+    		    break
+        # print 
+    return clusters
+   
 
+#################################################
+######################## TESTS ##################
+#################################################
+
+#################################################
+######################### Main ##################
+#################################################
+
+#################################################
 # Be sure that user enters correct params to the CL
 if len(sys.argv) < 3:
     print '''!ERROR!\n[Usage: python ''' + sys.argv[0] + ''' integer for K/'randomk'  InFile/'RandomData'  OutFile]\nPlase try again.\nExiting...'''
@@ -267,88 +344,44 @@ if len(sys.argv) < 3:
 # get K from either the input or generate it randomly
 k = get_k(sys.argv)
 # get the data from the file
-print sys.argv[2]
+print "Data is read from : " + str( sys.argv[2] )
+#################################################
 data, labels = io.read_data( get_data( sys.argv ) )
 
 # print len( list2set(data) ) 
-
-
+#################################################
+## fetch the data an initialize everything so we can run the algorithm
+#################################################
+## add the points to a list 
 points = []
 for dt in data:
 	pt1 = Point(dt)
 	points.append( pt1 )
-temp = Cluster(points[0], points[:50])
 
-temp.update_centroid()
 
-print " Center of first " + str( temp.center.coords)
-
-# centers set
-centers = set()
-while len( centers ) < k:
-	centers.add( random.choice( points ) )
 # Pick out k random points to use as our initial centroids
 # initial = random.sample(points, k)
 #centers.add ( points[63])
 #centers.add ( points[53])
 #centers.add ( points[74] )
 
-# list of centroids
-clusters = []
-counter = 0
-for cent in centers:
-	clusters.append( Cluster( cent ) )
-	clusters[-1].set_id( counter ) 
-	counter += 1
-############################################
-for i in xrange( MAX_ITERS ):
-	flag = False
-	
-	for ctrd in clusters:
-		# print the centroid and its intradistance
-		print "Cluster no. " + str(ctrd.get_id())
-		print ctrd.intra_distance()
-		ctrd.update_centroid()
-	# for each point , update the centroid
-	for pt in points:
- 		choose_cluster( pt, clusters )
- 	# id no points change centroid, stop
-	if not flag:
-		flag_count += 1
-		print "Iterations: " + str(i)
-		if flag_count >= 5:
-			break
-	print ""
-# now compute centroid for each point
-#  for pt in points:
-# 	choose_centroid( pt, centroids )
 
-# pt1 = Point( data[7] )
-# centroid.add_point( pt1 )
+#################################################
 
+clusters = kmeans( k, points )
+
+#################################################
 # print the number of points in each centroid
-for ctrd in clusters:
-	print "Cluster # " + str( ctrd.get_id() )
-	print "Center " + str (ctrd.center.coords)
-	#for pt in ctrd.points:
-		#print pt.coords,
-		#print " dist  " + str (pt.distance( centroids[0].center ) )+  " " +  str (pt.distance( centroids[1].center ) ) + " " + str (pt.distance( centroids[2].center ) )
-	print len(  ctrd.points  )
+pretty_print( clusters )
+
+#################################################
 # write points and their cluster ID to file 
-if len(sys.argv) < 4:
-	f = open("output.csv", "w")
-else:
-	f = open(sys.argv[3], "w")
-f.write("# The coordinates of the points and the cluster they are in\n")
-for pt in points:
-	f.write( str( pt.coords ) + " | Cluster id: " + str( pt.cluster ) + "|\n") 
-f.close()
+write_output( sys.argv, points )
+
+#################################################
 # write centers and their cluster ID to file 
-f = open("centers.csv", "w")
-f.write("# The coordinates of the centers\n")
-for ct in clusters:
-	f.write( str( ct.center.coords ) + " | Cluster id: " + str( ct.get_id() ) + "|\n") 
-f.close()
+write_centers( sys.argv, clusters )
+
 
 print "flag count at end " + str(flag_count)
 
