@@ -22,9 +22,9 @@ flag_count = 0
 ###############################################################################
 ####################### Classes ###############################################
 ###############################################################################
-class Centroid:
+class Cluster:
 	"""
-		A centroid is a group of points 
+		A cluster is a group of points 
 		it has a center and a list of points,
 		as well as an ID
 		
@@ -73,20 +73,20 @@ class Centroid:
 		
 	def add_point(self, point):
 		"""
-		@Helper method to add point to a centroid
-		@params: point = Point to add to the centroid
+		@Helper method to add point to a cluster
+		@params: point = Point to add to the cluster
 		"""
 		# print "Add point called"
 		self.points.append(point)
 	
 	def remove_point(self, point):
 		"""
-		@Helper method to remove a point from centroid
-		@params: point = Point to remove from the centroid
+		@Helper method to remove a point from cluster
+		@params: point = Point to remove from the cluster
 		"""		
 		self.points.remove(point)
 		
-	def update_center(self):
+	def update_centroid(self):
 		"""
 		@Helper method to recompute the center
 		@params: 
@@ -106,8 +106,8 @@ class Centroid:
 		
 	def intra_distance(self):
 		"""
-		@Helper method to compute intra centroid mean distance
-		@return: the average distance within the centroid
+		@Helper method to compute intra cluster mean distance
+		@return: the average distance within the cluster
 		"""	
 		sums = 0.0
 		for pt in self.points:
@@ -120,9 +120,9 @@ class Centroid:
 	def __str__(self):
 		"""
 		@Override: toString method
-		@return: structured information on centroid
+		@return: structured information on cluster
 		"""	
-		rtstring = "Centroid with id: " + str( self.get_id() ) + "\nCenter : " + str( self.center ) + "\nPoints"
+		rtstring = "Cluster with id: " + str( self.get_id() ) + "\nCenter : " + str( self.center ) + "\nPoints"
 		for pt in self.points:
 			rtstring += "[ " + str( pt ) + " ] "
 		return rtstring
@@ -137,14 +137,14 @@ class Point:
 		Contains the definition of a point 
 		Attributes:
 			coords - the coordinates of a point
-			centroid - the centroid ID it is in 
+			cluster - the cluster ID it is in 
 					(at start all are in -1)
 		Methods:
 			distance - computes distance to 
 						another Point
 			
 	"""
-	centroid = -1
+	cluster = -1
 	
 	def __init__(self, coords= []):
 		self.coords = coords
@@ -169,35 +169,35 @@ class Point:
 ###############################################################################
 # FUNCTION
 ###############################################################################
-def choose_centroid(point, centroids):
+def choose_cluster(point, clusters):
 	"""
-		Update the centroid for the given point
-		Computer the distances and finds the 
-		Centroid that is closest
+		Update the cluster for the given point
+		Compute the distances and finds the 
+		Cluster that is closest
 		
-		@effect: moves a Point from a Centroid
+		@effect: moves a Point from a Cluster
 				if it is closer to its center
 	"""
 	distances =[]
 	global flag
 	global flag_count	
-	for i in xrange( len(centroids) ):
-		distances.append( point.distance( centroids[i].get_center() ) )
+	for i in xrange( len(clusters) ):
+		distances.append( point.distance( clusters[i].get_center() ) )
 	
 	minindex = distances.index ( min( distances ) )
 	# print "Adding point .." + str(point) + " to centroid " + str(minindex)
-	centroids[minindex].add_point( point )
+	clusters[minindex].add_point( point )
 #	for ct in centroids:
 #		print " ## " + str( ct ) + "##"
 	
-	for ct in centroids:
-		if (ct.get_id() == point.centroid) and (point in ct.points):
+	for ct in clusters:
+		if (ct.get_id() == point.cluster) and (point in ct.points):
 			ct.remove_point(point)
 			break
-	if point.centroid != centroids[minindex].get_id():
+	if point.cluster != clusters[minindex].get_id():
 		flag = True	
 		flag_count = 0
-	point.centroid = centroids[minindex].get_id()
+	point.cluster = clusters[minindex].get_id()
 
 """
     Get the K from the user, if user enters randomK, generate
@@ -249,14 +249,15 @@ def list2set(aList):
 ###############################################################################
 ########################## TESTS ##############################################
 ###############################################################################
-
+def kmeans():
+    pass    
 
 ###############################################################################
 ######################## TESTS END ############################################
 ###############################################################################
 
 ###############################################################################
-# Main
+######################### Main ################################################
 ###############################################################################
 
 # Be sure that user enters correct params to the CL
@@ -276,9 +277,9 @@ points = []
 for dt in data:
 	pt1 = Point(dt)
 	points.append( pt1 )
-temp = Centroid(points[0], points[:50])
+temp = Cluster(points[0], points[:50])
 
-temp.update_center()
+temp.update_centroid()
 
 print " Center of first " + str( temp.center.coords)
 
@@ -286,29 +287,31 @@ print " Center of first " + str( temp.center.coords)
 centers = set()
 while len( centers ) < k:
 	centers.add( random.choice( points ) )
+# Pick out k random points to use as our initial centroids
+# initial = random.sample(points, k)
 #centers.add ( points[63])
 #centers.add ( points[53])
 #centers.add ( points[74] )
 
 # list of centroids
-centroids = []
+clusters = []
 counter = 0
 for cent in centers:
-	centroids.append( Centroid( cent ) )
-	centroids[-1].set_id( counter ) 
+	clusters.append( Cluster( cent ) )
+	clusters[-1].set_id( counter ) 
 	counter += 1
 ############################################
 for i in xrange( MAX_ITERS ):
 	flag = False
 	
-	for ctrd in centroids:
+	for ctrd in clusters:
 		# print the centroid and its intradistance
-		print "Centroid no. " + str(ctrd.get_id())
+		print "Cluster no. " + str(ctrd.get_id())
 		print ctrd.intra_distance()
-		ctrd.update_center()
+		ctrd.update_centroid()
 	# for each point , update the centroid
 	for pt in points:
- 		choose_centroid( pt, centroids )
+ 		choose_cluster( pt, clusters )
  	# id no points change centroid, stop
 	if not flag:
 		flag_count += 1
@@ -324,8 +327,8 @@ for i in xrange( MAX_ITERS ):
 # centroid.add_point( pt1 )
 
 # print the number of points in each centroid
-for ctrd in centroids:
-	print "Centroid # " + str( ctrd.get_id() )
+for ctrd in clusters:
+	print "Cluster # " + str( ctrd.get_id() )
 	print "Center " + str (ctrd.center.coords)
 	#for pt in ctrd.points:
 		#print pt.coords,
@@ -338,13 +341,13 @@ else:
 	f = open(sys.argv[3], "w")
 f.write("# The coordinates of the points and the cluster they are in\n")
 for pt in points:
-	f.write( str( pt.coords ) + " | Centroid id: " + str( pt.centroid ) + "|\n") 
+	f.write( str( pt.coords ) + " | Cluster id: " + str( pt.cluster ) + "|\n") 
 f.close()
 # write centers and their cluster ID to file 
 f = open("centers.csv", "w")
 f.write("# The coordinates of the centers\n")
-for ct in centroids:
-	f.write( str( ct.center.coords ) + " | Centroid id: " + str( ct.get_id() ) + "|\n") 
+for ct in clusters:
+	f.write( str( ct.center.coords ) + " | Cluster id: " + str( ct.get_id() ) + "|\n") 
 f.close()
 
 print "flag count at end " + str(flag_count)
