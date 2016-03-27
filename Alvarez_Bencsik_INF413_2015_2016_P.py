@@ -247,6 +247,13 @@ def list2set(aList):
 			_set.add( el )
 	return _set
 
+def get_points( data ):
+    points = []
+    for dt in data:
+        pt1 = Point(dt)
+        points.append( pt1 )
+    return points
+
 def pretty_print(clusters):
     for ctrd in clusters:
         print "Cluster # " + str( ctrd.get_id() )
@@ -284,12 +291,24 @@ def kmeans( k, points ):
     global flag_count
     
     # centers set so we do not have a duplicate point as a center
+    """
+        create the centers as a set
+        no duplicates 
+        take them random
+    """
     centers = set()
     while len( centers ) < k:
         centers.add( random.choice( points ) )
-    
+    centers.add( points[0] )
+    centers.add( points[142] )
+    centers.add( points[121] )
     # list of clusters where we keep the K clusters
     # also give them an ID
+    """
+        clusters have an id
+        their initial centroid is 
+        one of the centers chosen earlier
+    """
     clusters = []
     counter = 0
     for cent in centers:
@@ -353,11 +372,7 @@ data, labels = io.read_data( get_data( sys.argv ) )
 ## fetch the data an initialize everything so we can run the algorithm
 #################################################
 ## add the points to a list 
-points = []
-for dt in data:
-	pt1 = Point(dt)
-	points.append( pt1 )
-
+points = get_points( data )
 
 # Pick out k random points to use as our initial centroids
 # initial = random.sample(points, k)
