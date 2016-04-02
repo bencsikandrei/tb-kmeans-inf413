@@ -5,7 +5,7 @@
 #
 #
 _author_="Alvarez Paulina, Bencsik Andrei"
-_version_="1.0"
+_version_="2.0"
 
  
 import random
@@ -227,6 +227,12 @@ def get_k(argv):
 		return 0
 
 def get_data(argv):
+	"""
+	    get the data from either
+	    ARGV -> command line args
+	    or RANDOM
+	    send the generated file back to the user
+	"""
 	if len(argv) >= 3:
 		# If not, we take a k between 2 and MaxK(predefined in codes) randomly:
 		if str(argv[2]).lower() == 'randomdata':
@@ -241,6 +247,10 @@ def get_data(argv):
 		return 0
 
 def list2set(aList):
+    """
+        take a list
+        return a set 
+    """
 	_set = set()
 	for ll in aList:
 		for el in ll:
@@ -248,6 +258,11 @@ def list2set(aList):
 	return _set
 
 def get_points( data ):
+    """
+        get points from RAW data
+        put them in a list
+        and return them
+    """
     points = []
     for dt in data:
         pt1 = Point(dt)
@@ -255,6 +270,10 @@ def get_points( data ):
     return points
 
 def pretty_print(clusters):
+    """
+        print the result in a readable 
+        format
+    """
     for ctrd in clusters:
         print "Cluster # " + str( ctrd.get_id() )
         print "Center " + str (ctrd.center.coords)
