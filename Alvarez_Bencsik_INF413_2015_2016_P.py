@@ -251,11 +251,11 @@ def list2set(aList):
         take a list
         return a set 
     """
-	_set = set()
-	for ll in aList:
-		for el in ll:
-			_set.add( el )
-	return _set
+    _set = set()
+    for ll in aList:
+        for el in ll:
+            _set.add( el )
+    return _set
 
 def get_points( data ):
     """
@@ -273,6 +273,9 @@ def pretty_print(clusters):
     """
         print the result in a readable 
         format
+        
+        Cluster number #
+        and its Center 
     """
     for ctrd in clusters:
         print "Cluster # " + str( ctrd.get_id() )
@@ -283,6 +286,10 @@ def pretty_print(clusters):
         print "Points within the cluster : " + str ( len(  ctrd.points  ) )
         
 def write_output(argv, points):
+    """
+        perform error checking and 
+        write data to output 
+    """
     if len(argv) < 4:
         f = open("output.csv", "w")
     else:
@@ -293,6 +300,10 @@ def write_output(argv, points):
     f.close()
     
 def write_centers(argv, clusters):
+    """
+        perform error checking and 
+        write data to output 
+    """
     f = open("centers.csv", "w")
     f.write("# The coordinates of the centers\n")
     for ct in clusters:
@@ -318,9 +329,6 @@ def kmeans( k, points ):
     centers = set()
     while len( centers ) < k:
         centers.add( random.choice( points ) )
-    centers.add( points[0] )
-    centers.add( points[142] )
-    centers.add( points[121] )
     # list of clusters where we keep the K clusters
     # also give them an ID
     """
